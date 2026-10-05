@@ -1,0 +1,3 @@
+[submodule "zumo-2040-robot"]
+	path = zumo-2040-robot
+	url = https://github.com/pololu/zumo-2040-robot.git
