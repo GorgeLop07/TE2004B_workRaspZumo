@@ -14,7 +14,7 @@ static const char *WIFI_SSID = "embedded";
 static const char *WIFI_PASSWORD = "12345678";
 static const uint16_t TELEMETRY_PORT = 5000;
 
-#define TEAM_MARKER_ID   3      // id of the team's aruco marker
+#define TEAM_MARKER_ID   1     // id of the team's aruco marker
 #define CAN_PERIOD_MS    50
 #define LP_TIMEOUT_MS    500
 #define LP_LINE_MAX      512
@@ -123,6 +123,8 @@ int main(void) {
 
     printf("\n--- Pico 2 W Local Positioning -> CAN ---\n");
     mcp2515_init();
+    uint8_t canstat = mcp2515_read_register(MCP2515_CANSTAT);
+    printf("MCP2515 CANSTAT=0x%02X after reset (0x80 = SPI OK)\n", canstat);
     if (!mcp2515_set_bitrate_500kbps_8mhz()) {
         printf("MCP2515 config failed. Check wiring.\n");
     }

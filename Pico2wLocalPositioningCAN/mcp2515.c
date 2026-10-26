@@ -111,12 +111,18 @@ bool mcp2515_send_message(const can_frame_t *frame) {
     spi_write_blocking(MCP2515_SPI_PORT, &cmd, 1);
     cs_deselect();
 
-    uint32_t timeout = 1000;
-    while ((mcp2515_read_register(MCP2515_TXB0CTRL) & 0x08) && timeout--) {
+    uint32_t timeout = 10;
+    while ((mcp2515_read_register(MCP2515_TXB0CTRL) & 0x08) && timeout > 0) {
         sleep_ms(1);
+        timeout--;
     }
     mcp2515_modify_register(MCP2515_CANINTF, MCP2515_CANINTF_TX0IF, 0x00);
-    return timeout > 0;
+    if (timeout == 0) {
+        /* No ACK on the bus: abort so TXB0 can be reloaded. */
+        mcp2515_modify_register(MCP2515_TXB0CTRL, 0x08, 0x00);
+        return false;
+    }
+    return true;
 }
 bool mcp2515_message_available(void) {
     return (mcp2515_read_register(MCP2515_CANINTF) & MCP2515_CANINTF_RX0IF) != 0;

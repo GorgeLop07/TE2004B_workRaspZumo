@@ -46,6 +46,8 @@ int main(void) {
 
     printf("\n--- Zumo Local Positioning over CAN ---\n");
     mcp2515_init();
+    uint8_t canstat = mcp2515_read_register(MCP2515_CANSTAT);
+    printf("MCP2515 CANSTAT=0x%02X after reset (0x80 = SPI OK)\n", canstat);
     if (!mcp2515_set_bitrate_500kbps_8mhz()) {
         printf("MCP2515 config failed. Check wiring.\n");
     }
