@@ -1,0 +1,42 @@
+;
+; Copyright (c) 2023 Raspberry Pi (Trading) Ltd.
+; SPDX-License-Identifier: BSD-3-Clause
+;
+.pio_version 0
+.program quadrature_encoder
+.origin 0
+
+; Quadrature transition table. Y is the signed count and ISR/OSR hold the
+; previous two-bit phase state between samples.
+    jmp update
+    jmp decrement
+    jmp increment
+    jmp update
+    jmp increment
+    jmp update
+    jmp update
+    jmp decrement
+    jmp decrement
+    jmp update
+    jmp update
+    jmp increment
+    jmp update
+    jmp increment
+decrement:
+    jmp y--, update
+
+.wrap_target
+update:
+    mov isr, y
+    push noblock
+    out isr, 2
+    in pins, 2
+    mov osr, isr
+    mov pc, isr
+
+increment:
+    mov y, ~y
+    jmp y--, increment_cont
+increment_cont:
+    mov y, ~y
+.wrap
