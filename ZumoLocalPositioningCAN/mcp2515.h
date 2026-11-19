@@ -10,7 +10,7 @@
 #define MCP2515_PIN_CS     1
 #define MCP2515_PIN_SCK    2
 #define MCP2515_PIN_MOSI   3
-#define MCP2515_PIN_INT    28
+#define MCP2515_PIN_INT    16
 #define MCP2515_SPI_BAUD   1000000u  //u means unsigned
 
 #define MCP2515_CMD_RESET       0xC0

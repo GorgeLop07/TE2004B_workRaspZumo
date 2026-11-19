@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "mcp2515.h"
 #include "hardware/gpio.h"
 #include "pico/stdlib.h"
@@ -69,6 +70,41 @@ uint8_t mcp2515_read_status(void) {
     return rx[1];
 }
 
+/* SPI link test: verifies MOSI, MISO, SCK and CS by writing patterns to a
+ * config register (CNF1) and reading them back. Returns true if all pass. */
+bool mcp2515_spi_selftest(void) {
+    bool ok = true;
+    mcp2515_reset();
+
+    uint8_t canstat = mcp2515_read_register(MCP2515_CANSTAT);
+    uint8_t canctrl = mcp2515_read_register(MCP2515_CANCTRL);
+    printf("[SPI] after reset: CANSTAT=0x%02X (expect 0x80)  CANCTRL=0x%02X (expect 0x87)\n",
+           canstat, canctrl);
+    if ((canstat & MCP2515_MODE_MASK) != MCP2515_MODE_CONFIG) ok = false;
+
+    static const uint8_t patterns[] = { 0x55, 0xAA, 0x00, 0xFF, 0x0F, 0xF0, 0x12 };
+    for (unsigned i = 0; i < sizeof patterns; i++) {
+        mcp2515_write_register(MCP2515_CNF1, patterns[i]);
+        uint8_t back = mcp2515_read_register(MCP2515_CNF1);
+        printf("[SPI] CNF1 write 0x%02X -> read 0x%02X %s\n",
+               patterns[i], back, back == patterns[i] ? "ok" : "MISMATCH");
+        if (back != patterns[i]) ok = false;
+    }
+    mcp2515_write_register(MCP2515_CNF1, 0x00);
+
+    printf("[SPI] INT idle level = %d (expect 1)\n", gpio_get(MCP2515_PIN_INT));
+    if (!gpio_get(MCP2515_PIN_INT)) ok = false;
+
+    if (!ok) {
+        printf("[SPI] FAIL. Hints: all reads 0x00 -> MISO stuck low or chip unpowered;\n"
+               "      all reads 0xFF -> MISO floating/high or CS not reaching chip;\n"
+               "      CANSTAT ok but CNF1 mismatch -> MOSI or SCK problem.\n");
+    } else {
+        printf("[SPI] PASS\n");
+    }
+    return ok;
+}
+
 bool mcp2515_set_mode(uint8_t mode)
 {
     mcp2515_modify_register(MCP2515_CANCTRL,
@@ -112,13 +148,38 @@ bool mcp2515_send_message(const can_frame_t *frame) {
     spi_write_blocking(MCP2515_SPI_PORT, &cmd, 1);
     cs_deselect();
 
-    uint32_t timeout = 1000;
-    while ((mcp2515_read_register(MCP2515_TXB0CTRL) & 0x08) && timeout--) {
+    /* Wait for TXREQ (0x08) to clear. With no other node ACKing, the chip
+     * retries forever, so TXREQ never clears and we must report failure. */
+    bool sent = false;
+    absolute_time_t deadline = make_timeout_time_ms(50);
+    do {
+        uint8_t ctrl = mcp2515_read_register(MCP2515_TXB0CTRL);
+        if (!(ctrl & 0x08)) {                      // TXREQ cleared
+            sent = !(ctrl & 0x30);                 // no TXERR / MLOA
+            break;
+        }
         sleep_ms(1);
+    } while (!time_reached(deadline));
+
+    if (!sent) {
+        /* Abort the pending frame so it does not linger and fire later. */
+        mcp2515_modify_register(MCP2515_TXB0CTRL, 0x08, 0x00);
     }
     mcp2515_modify_register(MCP2515_CANINTF, MCP2515_CANINTF_TX0IF, 0x00);
-    return timeout > 0;
+    return sent;
 }
+
+/* Prints TEC/REC/EFLG. Rising TEC with no REC = nobody ACKs (bus open,
+ * termination, bitrate/crystal). TEC>=128 error-passive, EFLG bit5 bus-off. */
+void mcp2515_print_bus_health(void) {
+    uint8_t tec  = mcp2515_read_register(MCP2515_TEC);
+    uint8_t rec  = mcp2515_read_register(MCP2515_REC);
+    uint8_t eflg = mcp2515_read_register(MCP2515_EFLG);
+    printf("[BUS] TEC=%u REC=%u EFLG=0x%02X%s%s\n", tec, rec, eflg,
+           (eflg & 0x20) ? " BUS-OFF" : "",
+           (tec >= 128 || rec >= 128) ? " ERROR-PASSIVE" : "");
+}
+
 bool mcp2515_message_available(void) {
     return (mcp2515_read_register(MCP2515_CANINTF) & MCP2515_CANINTF_RX0IF) != 0;
 }

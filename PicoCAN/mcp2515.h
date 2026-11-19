@@ -11,7 +11,7 @@
 #define MCP2515_PIN_CS     1
 #define MCP2515_PIN_SCK    2
 #define MCP2515_PIN_MOSI   3
-#define MCP2515_PIN_INT    28
+#define MCP2515_PIN_INT    16
 
 #define MCP2515_SPI_BAUD   1000000u  //u means unsigned
 #define MCP2515_CMD_RESET       0xC0
@@ -29,6 +29,9 @@
 #define MCP2515_CANINTE   0x2B
 #define MCP2515_CANINTF   0x2C
 
+#define MCP2515_TEC       0x1C
+#define MCP2515_REC       0x1D
+#define MCP2515_EFLG      0x2D
 #define MCP2515_TXB0CTRL  0x30
 #define MCP2515_TXB0SIDH  0x31
 #define MCP2515_TXB0SIDL  0x32
@@ -64,6 +67,8 @@ void    mcp2515_write_register(uint8_t address, uint8_t value);
 void    mcp2515_modify_register(uint8_t address, uint8_t mask, uint8_t value);
 uint8_t mcp2515_read_status(void);
 bool    mcp2515_set_mode(uint8_t mode);
+bool    mcp2515_spi_selftest(void);
+void    mcp2515_print_bus_health(void);
 bool    mcp2515_set_bitrate_500kbps_8mhz(void);
 bool    mcp2515_send_message(const can_frame_t *frame);
 bool    mcp2515_message_available(void);

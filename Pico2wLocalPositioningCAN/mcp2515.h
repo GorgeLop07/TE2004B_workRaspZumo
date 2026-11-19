@@ -6,10 +6,10 @@
 #include "hardware/spi.h"
 
 #define MCP2515_SPI_PORT   spi0
-#define MCP2515_PIN_MISO   16
-#define MCP2515_PIN_CS     17
-#define MCP2515_PIN_SCK    18
-#define MCP2515_PIN_MOSI   19
+#define MCP2515_PIN_MISO   4
+#define MCP2515_PIN_CS     5
+#define MCP2515_PIN_SCK    6
+#define MCP2515_PIN_MOSI   7
 #define MCP2515_PIN_INT    20
 #define MCP2515_SPI_BAUD   (10 * 1000 * 1000)   // SPI clock 10 MHz
 

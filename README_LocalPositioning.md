@@ -51,7 +51,7 @@ El avance se mide como `|y - y_inicio|`, así que funciona aunque el carrito vay
 
 ## Notas
 
-- Pines: Zumo GP0/1/2/3/28 y Pico 2 W GP16/17/18/19/20 en `spi0`, igual que la actividad de CAN.
+- Pines: Zumo GP0/1/2/3/16 y Pico 2 W GP4/5/6/7/20 en `spi0`, igual que la actividad de CAN.
 - Se usa el `mcp2515.c` de la Parte 3 de la actividad de CAN en ambas placas. El prototipo de
   `mcp2515_set_mode` en el `.h` se dejó como `bool` porque en el PDF no coincidía con el `.c`.
 - Si su módulo MCP2515 trae cristal de 16 MHz, cambiar `CNF1=0x00, CNF2=0xF0, CNF3=0x86`

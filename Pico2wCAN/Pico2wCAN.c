@@ -18,6 +18,7 @@ static bool run_loopback_self_test(void) {
     }
 
     sleep_ms(50);
+    printf("[INT] level after loopback RX = %d (expect 0)\n", gpio_get(MCP2515_PIN_INT));
 
     can_frame_t rx_frame;
     if (!mcp2515_read_message(&rx_frame)) {
@@ -44,6 +45,7 @@ int main(void) {
     printf("\n--- Pico 2 W + MCP2515 CAN demo ---\n");
 
     mcp2515_init();
+    mcp2515_spi_selftest();
     mcp2515_set_bitrate_500kbps_8mhz();
 
     if (!run_loopback_self_test()) {
@@ -69,6 +71,7 @@ int main(void) {
             } else {
                 printf("TX failed\n");
             }
+            mcp2515_print_bus_health();
             counter++;
             next_send = make_timeout_time_ms(1000);
         }
