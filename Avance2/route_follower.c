@@ -200,6 +200,7 @@ int main(void)
     bool encoder_count_baseline = encoders_ready &&
         encoders_read(&encoder_last_left_count, &encoder_last_right_count);
     bool encoder_feedback_active = false;
+    bool heading_alignment_needed = false;
     absolute_time_t last_encoder_feedback = get_absolute_time();
 
     printf("Live USB serial CAN monitor active: RX frames and decoded pose will print below.\n");
@@ -268,6 +269,7 @@ int main(void)
                     encoder_trim_left = encoder_trim_right = 0;
                     encoder_integral_left = encoder_integral_right = 0.0f;
                     encoder_feedback_active = false;
+                    heading_alignment_needed = true;
                     last_encoder_feedback = now;
                     state = RUNNING;
                     printf("Route start accepted at P14; proceeding toward P1.\n");
@@ -320,6 +322,7 @@ int main(void)
                         printf("Captured %s in order (seq=%u).\n",
                                route_waypoints[target_id].name, pose.seq);
                         ++target_order_index;
+                        heading_alignment_needed = true;
                         encoder_trim_left = encoder_trim_right = 0;
                         encoder_integral_left = encoder_integral_right = 0.0f;
                         captured_waypoint = true;
@@ -334,9 +337,11 @@ int main(void)
                     }
 
                     if (state == RUNNING && !captured_waypoint) {
-                        /* Aim directly from the current camera pose to the next waypoint. */
+                        /* Hold the fixed heading of this waypoint-to-waypoint leg. */
+                        uint8_t source_id = route_order[target_order_index - 1];
+                        point_t source = waypoint_point(source_id);
                         float bearing = radians_to_ddeg(atan2f(
-                            target.y - pose.y_mm, target.x - pose.x_mm));
+                            target.y - source.y, target.x - source.x));
                         int32_t heading_error = wrap_ddeg((int32_t)lroundf(bearing) -
                                                           pose.angle_ddeg);
                         int32_t turn = (int32_t)lroundf(-heading_error * ROUTE_HEADING_KP);
@@ -348,16 +353,29 @@ int main(void)
                         int base = distance < ROUTE_NEAR_DISTANCE_MM ?
                                    ROUTE_NEAR_SPEED : ROUTE_CRUISE_SPEED;
                         /* Pivot first for a large bearing error; otherwise drive an arc. */
-                        bool pivoting = abs(heading_error) > 350;
+                        int32_t abs_heading_error = abs(heading_error);
+                        if (abs_heading_error > ROUTE_HEADING_ALIGN_ENTER_DDEG)
+                            heading_alignment_needed = true;
+                        else if (abs_heading_error <= ROUTE_HEADING_ALIGN_EXIT_DDEG)
+                            heading_alignment_needed = false;
+                        bool pivoting = heading_alignment_needed;
                         if (pivoting) {
                             /* Static friction needs full pivot PWM; don't let wheel trim
                              * turn the fixed pivot command into an uneven command. */
+                            if (abs_heading_error <= ROUTE_HEADING_ALIGN_EXIT_DDEG) {
+                                heading_alignment_needed = false;
+                                pivoting = false;
+                            }
+                        }
+                        if (pivoting) {
                             turn = heading_error > 0 ? -ROUTE_PIVOT_SPEED : ROUTE_PIVOT_SPEED;
                             left = turn;
                             right = -left;
                             encoder_trim_left = encoder_trim_right = 0;
                             encoder_integral_left = encoder_integral_right = 0.0f;
                         } else {
+                            /* Inside the heading deadband, drive straight. */
+                            turn = 0;
                             int32_t requested_left = clamp_speed(base + turn);
                             int32_t requested_right = clamp_speed(base - turn);
                             left = apply_encoder_trim(requested_left, encoder_trim_left);

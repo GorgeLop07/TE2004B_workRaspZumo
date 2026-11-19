@@ -26,11 +26,13 @@
 #define ROUTE_CAN_TIMEOUT_MS         300
 #define ROUTE_LOOP_PERIOD_MS         10
 #define ROUTE_CRUISE_SPEED           1300
-#define ROUTE_PIVOT_SPEED             1300
+#define ROUTE_PIVOT_SPEED             1150
 #define ROUTE_NEAR_SPEED             700
 #define ROUTE_NEAR_DISTANCE_MM       250
 #define ROUTE_HEADING_KP             0.45f /* PWM per tenth-degree */
 #define ROUTE_MAX_TURN_CORRECTION    1300
+#define ROUTE_HEADING_ALIGN_ENTER_DDEG 50
+#define ROUTE_HEADING_ALIGN_EXIT_DDEG 40
 #define ROUTE_MAX_SPEED              2000
 
 /* Expected encoder counts per PWM unit over a 100 ms control interval. */
@@ -54,7 +56,7 @@ static const waypoint_t route_waypoints[ROUTE_WAYPOINT_COUNT] = {
     { "P1",  -390, 1100 },
     { "P2",  -190, 1130 },
     { "P3",  -250,  420 },
-    { "P4",  -510,  250 },
+    { "P4",  -80,  250 },
     { "P5",   -90,  990 },
     { "P6",   110, 1130 },
     { "P7",    70,  430 },
