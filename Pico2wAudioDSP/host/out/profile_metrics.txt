@@ -1,0 +1,17 @@
+
+=== Perfilado espectral (tono 700 Hz, SNR de entrada 0 dB, AWGN + factory1 + volvo) ===
+SNR de banda ancha a la entrada del filtro: +0.23 dB
+FIR  SNR de salida +15.05 dB  -> ganancia de SNR +14.82 dB ; ganancia del tono +0.01 dB
+IIR  SNR de salida +13.28 dB  -> ganancia de SNR +13.05 dB ; ganancia del tono -0.17 dB
+Atenuacion del ruido (PSD media del ruido solo, entrada -> salida):
+  100-600 Hz (bajas, motores)    FIR   55.9 dB   IIR   26.9 dB
+  800-900 Hz (entre tonos)       FIR   56.5 dB   IIR   12.8 dB
+  1150-3900 Hz (altas)           FIR   63.2 dB   IIR   32.6 dB
+Componentes espectrales dominantes fuera de banda (mezcla, relativo al pico del tono, a mas de 100 Hz de ambos tonos de comando):
+  sin filtro pico fuera de banda a   19.5 Hz :  -12.6 dB respecto al tono
+  FIR        pico fuera de banda a   27.3 Hz :  -71.5 dB respecto al tono
+  IIR        pico fuera de banda a  800.8 Hz :  -37.4 dB respecto al tono
+Distorsion armonica (tono solo, 2do y 3er armonico respecto al fundamental):
+  sin filtro 2f:  -102.7 dBc   3f:   -79.2 dBc
+  FIR        2f:  -140.2 dBc   3f:  -140.6 dBc
+  IIR        2f:  -134.1 dBc   3f:  -126.4 dBc

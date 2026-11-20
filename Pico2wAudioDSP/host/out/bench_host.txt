@@ -1,0 +1,8 @@
+
+=== Benchmark en la PC (x86, -O2). La Pico 2 W se mide con el comando 'b' del firmware ===
+Bloque                       ns/muestra MAC/muestra   RAM estado
+bloqueo DC                          4.0        1.0         8 B
+FIR multibanda (M=256)            203.4      257.0      1032 B
+banco IIR (2x2 biquads)             6.1       20.0        32 B
+tuberia completa                  220.8      287.0      1176 B
+Coeficientes en flash: FIR 1028 B, IIR 80 B, ventana Hann 1600 B

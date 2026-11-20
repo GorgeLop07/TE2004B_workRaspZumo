@@ -1,0 +1,36 @@
+Fs = 8000 Hz, tonos = [700 1000] Hz
+
+== FIR multibanda ==
+  M = 256 (257 coef.), banda de paso = tono +/- 50 Hz
+  Ancho de transicion Hamming ~ 3.3 Fs/M = 103.1 Hz ; retardo de grupo = M/(2Fs) = 16.0 ms
+  Ganancia de cada banda antes de normalizar: [0.9913 0.9912]
+
+== Banco IIR (Butterworth N=2 -> pasabanda, bilineal con prewarping) ==
+  Tono  700 Hz: Omega1=4175.14 Omega2=4853.55 B=678.40  Omega0,k=4501.584 rad/s  centro digital=698.40 Hz  radio max de polos=0.9738 (ESTABLE)
+  Tono 1000 Hz: Omega1=6262.28 Omega2=6998.54 B=736.26  Omega0,k=6620.184 rad/s  centro digital=999.02 Hz  radio max de polos=0.9734 (ESTABLE)
+
+== Equivalencia muestra-a-muestra (bufer circular / DF-II) vs vectorizado ==
+  bloqueo DC: 2.36e-16   FIR: 6.25e-17   banco IIR: 1.46e-16   (diferencia maxima)
+
+== Escenario: SNR de banda ancha -3 dB, ruido tipo 1 ==
+
+== Perfilado espectral (tono 700 Hz, SNR de entrada 0 dB) ==
+  SNR a la entrada del filtro: +0.41 dB
+  FIR  SNR de salida +15.67 dB -> ganancia de SNR +15.27 dB
+  IIR  SNR de salida +13.91 dB -> ganancia de SNR +13.51 dB
+  FIR: atenuacion del ruido entre tonos   56.5 dB
+  FIR: atenuacion del ruido 100-600 Hz    56.1 dB
+  FIR: atenuacion del ruido 1150-3900 Hz  63.2 dB
+  IIR: atenuacion del ruido entre tonos   12.8 dB
+  IIR: atenuacion del ruido 100-600 Hz    27.7 dB
+  IIR: atenuacion del ruido 1150-3900 Hz  32.6 dB
+
+== Deteccion ==
+  Umbrales calibrados (A700/A1000): sin filtro 0.0365/0.0345, FIR 0.0411/0.0342, IIR 0.0380/0.0333
+  Goertzel recursivo vs bin DFT directo: diferencia maxima 6.77e-17
+  Contaminada (sin DC)   comandos aceptados: [1 2]
+  Salida FIR             comandos aceptados: [1 2]
+  Salida banco IIR       comandos aceptados: [1 2]
+
+Figuras en /home/dafondron/Projects/clases/TE2004B/TE2004B_workRaspZumo/Pico2wAudioDSP/matlab/out
+EXIT 0

@@ -1,0 +1,4 @@
+build/
+host/bench
+host/gen_coeffs
+host/*.o

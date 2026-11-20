@@ -1,0 +1,70 @@
+NoiseX-92 factory1.wav  19980 Hz -> 8000 Hz, 235.2 s
+NoiseX-92 volvo.wav     19980 Hz -> 8000 Hz, 235.2 s
+
+=== Perfilado espectral (tono 700 Hz, SNR de entrada 0 dB, AWGN + factory1 + volvo) ===
+SNR de banda ancha a la entrada del filtro: +0.23 dB
+FIR  SNR de salida +15.05 dB  -> ganancia de SNR +14.82 dB ; ganancia del tono +0.01 dB
+IIR  SNR de salida +13.28 dB  -> ganancia de SNR +13.05 dB ; ganancia del tono -0.17 dB
+Atenuacion del ruido (PSD media del ruido solo, entrada -> salida):
+  100-600 Hz (bajas, motores)    FIR   55.9 dB   IIR   26.9 dB
+  800-900 Hz (entre tonos)       FIR   56.5 dB   IIR   12.8 dB
+  1150-3900 Hz (altas)           FIR   63.2 dB   IIR   32.6 dB
+Componentes espectrales dominantes fuera de banda (mezcla, relativo al pico del tono, a mas de 100 Hz de ambos tonos de comando):
+  sin filtro pico fuera de banda a   19.5 Hz :  -12.6 dB respecto al tono
+  FIR        pico fuera de banda a   27.3 Hz :  -71.5 dB respecto al tono
+  IIR        pico fuera de banda a  800.8 Hz :  -37.4 dB respecto al tono
+Distorsion armonica (tono solo, 2do y 3er armonico respecto al fundamental):
+  sin filtro 2f:  -102.7 dBc   3f:   -79.2 dBc
+  FIR        2f:  -140.2 dBc   3f:  -140.6 dBc
+  IIR        2f:  -134.1 dBc   3f:  -126.4 dBc
+
+=== Curva de estres: tasa de acierto (200 pruebas por punto, tono de 1 s, ruido ambiente RMS=0.10) ===
+
+Escenario AWGN   umbrales calibrados (A700/A1000):  sin_filtro=0.0487/0.0462  FIR=0.0426/0.0478  IIR=0.0469/0.0464
+  SNR[dB] | sin_filtro ok% wrong%| FIR        ok% wrong%| IIR        ok% wrong%|
+     +10  |            100.0   0.0 |            100.0   0.0 |            100.0   0.0 |
+      +5  |            100.0   0.0 |            100.0   0.0 |            100.0   0.0 |
+      +0  |            100.0   0.0 |            100.0   0.0 |            100.0   0.0 |
+      -5  |            100.0   0.0 |            100.0   0.0 |            100.0   0.0 |
+      -8  |            100.0   0.0 |            100.0   0.0 |            100.0   0.0 |
+     -10  |             31.0   0.0 |             42.5   0.0 |             25.5   0.0 |
+     -12  |              1.0   0.0 |              0.5   0.0 |              0.0   0.0 |
+     -15  |              0.0   0.0 |              0.0   0.0 |              0.0   0.0 |
+  Falsas alarmas (solo ruido, 132 s):  sin_filtro=0 (0.0/h)  FIR=0 (0.0/h)  IIR=0 (0.0/h)
+  Dos tonos de igual amplitud (debe rechazar): comandos aceptados de 200:  sin_filtro=0  FIR=0  IIR=0
+
+Escenario AWGN+NoiseX   umbrales calibrados (A700/A1000):  sin_filtro=0.0493/0.0402  FIR=0.0418/0.0422  IIR=0.0478/0.0397
+  SNR[dB] | sin_filtro ok% wrong%| FIR        ok% wrong%| IIR        ok% wrong%|
+     +10  |            100.0   0.0 |            100.0   0.0 |            100.0   0.0 |
+      +5  |            100.0   0.0 |            100.0   0.0 |            100.0   0.0 |
+      +0  |            100.0   0.0 |            100.0   0.0 |            100.0   0.0 |
+      -5  |            100.0   0.0 |            100.0   0.0 |            100.0   0.0 |
+      -8  |             99.5   0.0 |            100.0   0.0 |             99.5   0.0 |
+     -10  |             48.5   0.0 |             72.0   0.0 |             41.5   0.0 |
+     -12  |              1.0   0.0 |              2.0   0.0 |              1.5   0.0 |
+     -15  |              0.0   0.0 |              0.0   0.0 |              0.0   0.0 |
+  Falsas alarmas (solo ruido, 132 s):  sin_filtro=0 (0.0/h)  FIR=0 (0.0/h)  IIR=0 (0.0/h)
+  Dos tonos de igual amplitud (debe rechazar): comandos aceptados de 200:  sin_filtro=0  FIR=0  IIR=0
+
+Escenario NoiseX   umbrales calibrados (A700/A1000):  sin_filtro=0.0264/0.0213  FIR=0.0229/0.0172  IIR=0.0249/0.0215
+  SNR[dB] | sin_filtro ok% wrong%| FIR        ok% wrong%| IIR        ok% wrong%|
+     +10  |            100.0   0.0 |            100.0   0.0 |            100.0   0.0 |
+      +5  |            100.0   0.0 |            100.0   0.0 |            100.0   0.0 |
+      +0  |            100.0   0.0 |            100.0   0.0 |            100.0   0.0 |
+      -5  |            100.0   0.0 |            100.0   0.0 |            100.0   0.0 |
+      -8  |            100.0   0.0 |            100.0   0.0 |             99.5   0.0 |
+     -10  |             88.5   0.0 |             91.0   0.0 |             85.5   0.0 |
+     -12  |             37.0   0.0 |             35.0   0.0 |             32.0   0.0 |
+     -15  |              0.0   0.0 |              0.0   0.0 |              0.0   0.0 |
+  Falsas alarmas (solo ruido, 132 s):  sin_filtro=0 (0.0/h)  FIR=0 (0.0/h)  IIR=0 (0.0/h)
+  Dos tonos de igual amplitud (debe rechazar): comandos aceptados de 200:  sin_filtro=0  FIR=0  IIR=0
+
+=== Benchmark en la PC (x86, -O2). La Pico 2 W se mide con el comando 'b' del firmware ===
+Bloque                       ns/muestra MAC/muestra   RAM estado
+bloqueo DC                          4.0        1.0         8 B
+FIR multibanda (M=256)            203.4      257.0      1032 B
+banco IIR (2x2 biquads)             6.1       20.0        32 B
+tuberia completa                  220.8      287.0      1176 B
+Coeficientes en flash: FIR 1028 B, IIR 80 B, ventana Hann 1600 B
+
+Listo. CSVs en out/

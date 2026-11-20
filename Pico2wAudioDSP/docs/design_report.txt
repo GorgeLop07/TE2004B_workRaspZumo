@@ -1,0 +1,36 @@
+REPORTE DE DISENO  Fs=8000 Hz
+Tonos: 700.0 1000.0 Hz  (separacion minima 300.0 Hz)
+
+== FIR multibanda (Hamming) ==
+ M=256  taps=257  banda de paso = tono +/- 50 Hz
+ Ancho de transicion Hamming  df ~ 3.3 Fs/M = 103.1 Hz
+ Retardo de grupo tau = M/(2 Fs) = 16.00 ms (128 muestras)
+ Banda 0: ganancia sin normalizar en el centro = 0.9913 (se divide entre ella)
+ Banda 1: ganancia sin normalizar en el centro = 0.9912 (se divide entre ella)
+ Requisito de orden para la separacion minima de 150 Hz: df <= 2(150-50) = 200 Hz  =>  M >= 3.3*Fs/df = 132
+
+== Banco IIR (Butterworth N=2 -> pasabanda, bilineal con prewarping) ==
+
+-- Tono 700.0 Hz, BW(-3dB)=100 Hz --
+ Prewarp: Omega1=4175.144  Omega2=4853.547 rad/s ; B=678.403 ; Omega_0,k = sqrt(Omega1 Omega2) = 4501.584 rad/s
+ Centro digital real 2 atan(Omega0 Ts/2) = 698.395 Hz (tono 700.0 Hz)
+ Polo prototipo LP  p = -0.707107 +0.707107j
+ Polo prototipo LP  p = -0.707107 -0.707107j
+ Polo z = +0.844769 -0.484496j  |z|=0.973843
+ Polo z = +0.814483 +0.529347j  |z|=0.971386
+ Biquad 0: b=[0.03821410 0.00000000 -0.03821410]  a=[1 -1.68953816 0.94837077]
+ Biquad 1: b=[0.03821410 0.00000000 -0.03821410]  a=[1 -1.62896609 0.94359124]
+ Radio maximo de polos = 0.973843  (ESTABLE)
+
+-- Tono 1000.0 Hz, BW(-3dB)=100 Hz --
+ Prewarp: Omega1=6262.279  Omega2=6998.544 rad/s ; B=736.264 ; Omega_0,k = sqrt(Omega1 Omega2) = 6620.184 rad/s
+ Centro digital real 2 atan(Omega0 Ts/2) = 999.017 Hz (tono 1000.0 Hz)
+ Polo prototipo LP  p = -0.707107 +0.707107j
+ Polo prototipo LP  p = -0.707107 -0.707107j
+ Polo z = +0.707652 -0.668334j  |z|=0.973366
+ Polo z = +0.668389 +0.705530j  |z|=0.971862
+ Biquad 0: b=[0.03821409 0.00000000 -0.03821409]  a=[1 -1.41530480 0.94744168]
+ Biquad 1: b=[0.03821409 0.00000000 -0.03821409]  a=[1 -1.33677862 0.94451654]
+ Radio maximo de polos = 0.973366  (ESTABLE)
+
+Estabilidad global: TODOS los polos dentro del circulo unitario
