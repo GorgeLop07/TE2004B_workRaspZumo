@@ -1,5 +1,6 @@
 // Genera dsp/dsp_coeffs.h (coeficientes que se compilan en la Pico) y un
 // reporte de diseno con todos los pasos intermedios (memoria de calculo).
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include "../dsp/dsp_config.h"
@@ -48,8 +49,15 @@ int main(int argc, char** argv) {
     fprintf(r, " Ancho de transicion Hamming  df ~ 3.3 Fs/M = %.1f Hz\n Retardo de grupo tau = M/(2 Fs) = %.2f ms (%d muestras)\n", Df, 1000.0 * DSP_FIR_M / (2 * fs), DSP_FIR_M / 2);
     for (size_t k = 0; k < tones.size(); k++)
         fprintf(r, " Banda %zu: ganancia sin normalizar en el centro = %.4f (se divide entre ella)\n", k, fir.band_gain_before_norm[k]);
-    fprintf(r, " Requisito de orden para la separacion minima de 150 Hz: df <= 2(150-%.0f) = %.0f Hz  =>  M >= 3.3*Fs/df = %.0f\n\n",
-            DSP_FIR_HALFBW_HZ, 2 * (150 - DSP_FIR_HALFBW_HZ), 3.3 * fs / (2 * (150 - DSP_FIR_HALFBW_HZ)));
+    {   // Criterios para M (ver matlab/explain_order_M.m y docs/MEMORIA_DE_CALCULO.md)
+        double sep = 1e9; for (size_t i = 1; i < tones.size(); i++) sep = std::min(sep, tones[i] - tones[i-1]);
+        double g = sep - 2 * DSP_FIR_HALFBW_HZ;                       // brecha entre bordes de banda
+        double dfc = 3.3 * fs / DSP_FIR_M;
+        fprintf(r, " Brecha entre bordes de banda g = sep - 2B = %.0f - %.0f = %.0f Hz\n", sep, 2 * DSP_FIR_HALFBW_HZ, g);
+        fprintf(r, " (a) necesaria  df <= g    =>  M >= 3.3*Fs/g   = %.0f   (las transiciones no se traslapan)\n", 3.3 * fs / g);
+        fprintf(r, " (b) deseada    df <= g/2  =>  M >= 6.6*Fs/g   = %.0f   (queda una banda de rechazo real de >= g/2)\n", 6.6 * fs / g);
+        fprintf(r, " Elegido M = %d: df = %.1f Hz ; rechazo pleno desde %.1f Hz de cada tono\n\n", DSP_FIR_M, dfc, DSP_FIR_HALFBW_HZ + dfc / 2);
+    }
 
     fprintf(r, "== Banco IIR (Butterworth N=%d -> pasabanda, bilineal con prewarping) ==\n", DSP_IIR_LP_ORDER);
     for (size_t t = 0; t < iir.size(); t++) {

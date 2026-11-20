@@ -7,7 +7,10 @@ Tonos: 700.0 1000.0 Hz  (separacion minima 300.0 Hz)
  Retardo de grupo tau = M/(2 Fs) = 16.00 ms (128 muestras)
  Banda 0: ganancia sin normalizar en el centro = 0.9913 (se divide entre ella)
  Banda 1: ganancia sin normalizar en el centro = 0.9912 (se divide entre ella)
- Requisito de orden para la separacion minima de 150 Hz: df <= 2(150-50) = 200 Hz  =>  M >= 3.3*Fs/df = 132
+ Brecha entre bordes de banda g = sep - 2B = 300 - 100 = 200 Hz
+ (a) necesaria  df <= g    =>  M >= 3.3*Fs/g   = 132   (las transiciones no se traslapan)
+ (b) deseada    df <= g/2  =>  M >= 6.6*Fs/g   = 264   (queda una banda de rechazo real de >= g/2)
+ Elegido M = 256: df = 103.1 Hz ; rechazo pleno desde 101.6 Hz de cada tono
 
 == Banco IIR (Butterworth N=2 -> pasabanda, bilineal con prewarping) ==
 

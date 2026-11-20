@@ -34,11 +34,31 @@ h[n] = Σ_k  h_k[n] w[n] / G_k          G_k = |Σ_n h_k[n] w[n] e^{-jω_k n}|
 para que cada tono pase con ganancia 1. Los 257 coeficientes están en `dsp/dsp_coeffs.h` (`dsp_fir_h`);
 son simétricos, por lo que la fase es exactamente lineal.
 
-**Elección del orden M = 256.** El ancho de transición de Hamming es `Δf ≈ 3.3·Fs/M` (∝ Fs/M).
-Con bandas de ±50 Hz y tonos separados al menos 150 Hz, la transición de cada borde debe caber en la
-brecha: `Δf ≤ 2(150 − 50) = 200 Hz` ⇒ `M ≥ 3.3·8000/200 = 132`. Se toma **M = 256** (Δf = 103 Hz) para
-tener margen y mucho rechazo entre tonos. **Retardo de grupo** `τ = M/(2Fs) = 128 muestras = 16 ms`,
+**Elección del orden M = 256.** Un FIR por ventana no pasa de 1 a 0 de golpe: tiene una *zona de transición*
+de ancho `Δf ≈ 3.3·Fs/M` para Hamming (∝ Fs/M; 3.1 Hann, 5.5 Blackman). Cada banda es `F ± B` (B = 50 Hz) y su
+transición está **centrada en el borde**, es decir ocupa `[B − Δf/2, B + Δf/2]` medido desde el tono; el rechazo
+pleno (≈ 53 dB de Hamming) empieza recién a `B + Δf/2` del tono. Entre dos tonos separados `Fsep` queda una brecha
+entre bordes `g = Fsep − 2B` (aquí `g = 300 − 100 = 200 Hz`):
+
+| Condición | Desigualdad | Resultado (Fs = 8 kHz) |
+|---|---|---|
+| (a) **necesaria**: las transiciones de bandas vecinas no se traslapan | `Δf ≤ g` ⇒ `M ≥ 3.3·Fs/g` | `M ≥ 132` (solo se *tocan*: no hay rechazo real) |
+| (b) **deseada**: queda una banda de rechazo real de ancho ≥ `g/2` | `Δf ≤ g/2` ⇒ `M ≥ 6.6·Fs/g` | `M ≥ 264` ⇒ **M = 256** (potencia de 2 más cercana, `Δf = 103 Hz`) |
+
+Con M = 256 el rechazo pleno empieza a 101.6 Hz de cada tono: queda una banda de rechazo de 802 a 898 Hz entre los tonos.
+**Verificación medida** (`matlab/explain_order_M.m`): rechazo en el *peor punto* de 800–900 Hz según M:
+
+| M | 64 | 100 | 132 | 192 | **256** | 264 | 384 | 512 | 768 |
+|---|---|---|---|---|---|---|---|---|---|
+| dB | 2.9 | 9.9 | 15.7 | 27.4 | **48.5** | 49.9 | 52.2 | 55.4 | 57.5 |
+| retardo [ms] | 4 | 6.2 | 8.2 | 12 | **16** | 16.5 | 24 | 32 | 48 |
+
+M = 132 cumple (a) pero rechaza solo 15.7 dB; M = 256 ya está a ~50 dB, en el piso de la ventana Hamming; duplicar M
+a 512 gana unos 7 dB y cuesta el doble de retardo y de MAC. **Retardo de grupo** `τ = M/(2Fs) = 128 muestras = 16 ms`,
 irrelevante frente a la decisión de 200 ms.
+
+**Si los tonos se acercan** (REQ-AUD-01 permite 150 Hz), `g = 150 − 2B` y la regla es la misma: con B = 50 Hz
+`g = 50` y haría falta `M ≥ 1056`; conviene bandas más angostas (B = 25 Hz: `M ≥ 528`).
 
 Costo: 257 MAC/muestra en forma directa I con bufer circular (se podrían reducir a ~129 explotando la
 simetría; no se hizo para mantener la forma directa que pide el reto).
